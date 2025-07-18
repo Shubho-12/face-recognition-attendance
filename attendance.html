@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Attendance Records</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f0f2f5; padding: 30px; }
+        h2 { color: #0d6efd; }
+        .back-button { margin-bottom: 20px; }
+        .pagination { justify-content: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <a href="/frs" class="btn btn-secondary back-button">← Back to Home</a>
+        <h2 class="mb-4 text-center">Attendance Records</h2>
+
+        <div class="d-flex justify-content-between mb-3">
+            <input type="date" id="filterDate" class="form-control w-25" />
+            <a href="/download" class="btn btn-success">Download CSV</a>
+        </div>
+
+        <table class="table table-bordered table-striped" id="attendanceTable">
+            <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Time</th>
+                    <th>Action</th> <!-- Added Action column -->
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Filled via JS -->
+            </tbody>
+        </table>
+
+        <nav>
+            <ul class="pagination" id="pagination">
+                <!-- JS-generated pagination -->
+            </ul>
+        </nav>
+    </div>
+
+    <script>
+        let attendanceData = [];
+        let currentPage = 1;
+        const rowsPerPage = 10;
+
+        async function loadAttendance() {
+            const date = document.getElementById('filterDate').value;
+            const url = date ? `/api/attendance?date=${date}` : '/api/attendance';
+
+            const response = await fetch(url);
+            attendanceData = await response.json();
+            currentPage = 1;
+            renderTable();
+            setupPagination();
+        }
+
+        function renderTable() {
+            const body = document.getElementById('tableBody');
+            body.innerHTML = '';
+
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const pageData = attendanceData.slice(start, end);
+
+            if (pageData.length === 0) {
+                body.innerHTML = '<tr><td colspan="3" class="text-center">No records found</td></tr>';
+            } else {
+                pageData.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${row.name}</td>
+                        <td>${row.time}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" onclick="deleteRecord('${row.name}', '${row.time}')">
+                                Delete
+                            </button>
+                        </td>
+                    `;
+                    body.appendChild(tr);
+                });
+            }
+        }
+
+        function setupPagination() {
+            const totalPages = Math.ceil(attendanceData.length / rowsPerPage);
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+
+            for (let i = 1; i <= totalPages; i++) {
+                const li = document.createElement('li');
+                li.className = 'page-item' + (i === currentPage ? ' active' : '');
+                li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                li.addEventListener('click', () => {
+                    currentPage = i;
+                    renderTable();
+                    setupPagination();
+                });
+                pagination.appendChild(li);
+            }
+        }
+
+        async function deleteRecord(name, time) {
+            if (!confirm(`Are you sure you want to delete the record for ${name} at ${time}?`)) return;
+
+            const response = await fetch('/api/delete_attendance', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, time })
+            });
+
+            if (response.ok) {
+                alert('Record deleted successfully.');
+                loadAttendance(); // Refresh table
+            } else {
+                alert('Failed to delete the record.');
+            }
+        }
+
+        document.getElementById('filterDate').addEventListener('change', loadAttendance);
+
+        loadAttendance();
+        setInterval(loadAttendance, 10000); // Refresh every 10s
+    </script>
+</body>
+</html>

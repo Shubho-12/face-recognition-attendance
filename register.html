@@ -1,0 +1,65 @@
+<!-- app/templates/register.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register New Face</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="p-4 bg-light">
+    <div class="container">
+        <!-- Title -->
+        <h2 class="mb-4 text-center text-primary">Register Your Face</h2>
+
+        <!-- 🔔 Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <!-- 📤 Upload Form -->
+        <form action="/upload_images" method="post" enctype="multipart/form-data" class="mb-5">
+            <div class="mb-3">
+                <label class="form-label">Enter Your Name:</label>
+                <input type="text" name="name" class="form-control" placeholder="e.g. John Doe" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Upload 3+ Images (JPG/PNG)</label>
+                <input type="file" name="images" accept="image/*" multiple required class="form-control">
+            </div>
+            <button type="submit" class="btn btn-primary">Submit & Encode</button>
+        </form>
+
+        <!-- 📂 Registered Faces -->
+        <h4 class="mb-3">📂 Registered Faces: <span class="text-success">{{ registered_count }}</span></h4>
+
+        <ul class="list-group mb-4">
+            {% for person in registered_people %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>{{ person }}</span>
+                <form method="POST" action="/delete_face" onsubmit="return confirm('Are you sure you want to delete {{ person }}?');" class="ms-2">
+                    <input type="hidden" name="person_name" value="{{ person }}">
+                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
+            </li>
+            {% else %}
+            <li class="list-group-item text-muted">No registered faces found.</li>
+            {% endfor %}
+        </ul>
+
+        <!-- 🔙 Back Button -->
+        <div class="text-center">
+            <a href="/frs" class="btn btn-secondary">← Back to Home</a>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS for alerts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

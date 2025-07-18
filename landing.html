@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome - Shubhojit Face Recognition System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: center;
+        }
+        .overlay {
+            background-color: rgba(0, 0, 0, 0.6);
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            flex-direction: column;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        .btn-start {
+            font-size: 1.25rem;
+            padding: 12px 30px;
+        }
+    </style>
+</head>
+<body style="background-image: url('{{ url_for('static', filename='bg.jpg') }}');">
+    <div class="overlay">
+        <h1>Shubhojit Face Recognition System</h1>
+        <p>Secure. Smart. Seamless attendance marking using face recognition.</p>
+        <a href="/frs" class="btn btn-primary btn-start mt-3">Get Started</a>
+    </div>
+</body>
+</html>
